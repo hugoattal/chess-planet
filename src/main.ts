@@ -1,6 +1,6 @@
 import "@/style/index.css";
 
-import ui from "@nuxt/ui/vite";
+import ui from "@nuxt/ui/vue-plugin";
 import { createPinia } from "pinia";
 import { createApp } from "vue";
 
