@@ -13,6 +13,7 @@
                 class="practice-layout"
             >
                 <CChessBoard
+                    :arrows="suggestedArrows"
                     :confirmed-square="confirmedSquare"
                     :disabled="!canPlayerMove"
                     @move="handlePlayerMove"
@@ -45,17 +46,18 @@
         />
 
         <CPracticeResult
-            v-if="outcome"
+            v-if="outcome && isResultOpen"
             :ended-streak="endedStreak"
             :outcome="outcome"
             :streak="streak"
+            @close="isResultOpen = false"
             @restart="startPractice"
         />
     </main>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { getOpeningFolders } from "@/lib/openingFolders.ts";
@@ -68,6 +70,7 @@ import CPracticeResult from "@/pages/practice/components/CPracticeResult.vue";
 import { useOpeningPractice } from "@/pages/practice/composables/useOpeningPractice.ts";
 
 const route = useRoute();
+const isResultOpen = ref(false);
 const folders = getOpeningFolders();
 const activeFolder = computed(() => {
     const folderName = route.query.folder;
@@ -89,8 +92,13 @@ const {
     outcome,
     startPractice,
     streak,
+    suggestedArrows,
     waitingForOpponent
 } = useOpeningPractice(activeFolder);
+
+watch(outcome, (value) => {
+    isResultOpen.value = Boolean(value);
+});
 </script>
 
 <style scoped>

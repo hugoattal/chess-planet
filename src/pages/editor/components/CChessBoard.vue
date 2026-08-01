@@ -1,8 +1,10 @@
 <template>
     <div class="board-panel">
-        <section
+        <CBoardArrows
             aria-label="Chess board"
+            :arrows="arrows"
             class="chess-board"
+            :flipped="isBlackOrientation"
         >
             <template
                 v-for="(rank, rankIndex) in displayedBoard"
@@ -58,7 +60,7 @@
                     </span>
                 </button>
             </template>
-        </section>
+        </CBoardArrows>
     </div>
 </template>
 
@@ -67,11 +69,14 @@ import type { Color, Move, PieceSymbol, Square } from "chess.js";
 import { BLACK, WHITE } from "chess.js";
 import { computed } from "vue";
 
+import CBoardArrows from "@/pages/editor/components/CBoardArrows.vue";
 import { useChessInteraction } from "@/pages/editor/composables/useChessInteraction.ts";
+import type { TBoardArrow } from "@/pages/editor/lib/boardArrows.ts";
 import { pieces } from "@/pages/editor/lib/pieces.ts";
 import { useChessStore } from "@/pages/editor/store/chess.ts";
 
 const props = defineProps<{
+    arrows?: Array<TBoardArrow>;
     confirmedSquare?: Square;
     disabled?: boolean;
 }>();
@@ -81,6 +86,7 @@ const emit = defineEmits<{
 }>();
 
 const chessStore = useChessStore();
+const arrows = computed(() => props.arrows);
 const confirmedSquare = computed(() => props.confirmedSquare);
 const isDisabled = computed(() => props.disabled);
 const isBlackOrientation = computed(() => chessStore.orientation === BLACK);
@@ -154,6 +160,7 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
     --board-light-square: color-mix(in oklab, var(--color-primary) 100%, var(--color-black));
     --board-dark-square: color-mix(in oklab, var(--color-primary) 75%, var(--color-black));
     --board-highlight: color-mix(in oklab, var(--color-primary) 64%, var(--color-white));
+    --board-arrow: color-mix(in oklab, var(--color-primary) 62%, var(--color-white));
     --board-white-piece: var(--color-white);
     --board-black-piece: var(--color-neutral-950);
 
@@ -172,6 +179,7 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     overflow: hidden;
+    position: relative;
     aspect-ratio: 1;
 
     .chess-square {
@@ -274,12 +282,12 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
             }
 
             .correct-move {
-                background: var(--color-primary);
+                background: var(--ui-success);
                 border: var(--length-xxxs) solid var(--color-white);
                 border-radius: 50%;
                 bottom: 0;
                 color: var(--color-white);
-                font-size: var(--font-icon-m);
+                font-size: var(--font-icon-l);
                 padding: var(--length-xxxs);
                 position: absolute;
                 right: calc(var(--length-xs) * -1);
