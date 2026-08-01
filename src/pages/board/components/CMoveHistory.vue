@@ -46,12 +46,61 @@
             />
             <p>Your moves will appear here.</p>
         </div>
+
+        <form
+            v-if="folders.length"
+            class="save-line"
+            @submit.prevent="saveLine"
+        >
+            <label for="target-folder">Save this line</label>
+            <div class="save-controls">
+                <select
+                    id="target-folder"
+                    v-model="selectedFolderName"
+                >
+                    <option
+                        v-for="folder in folders"
+                        :key="folder.name"
+                        :value="folder.name"
+                    >
+                        {{ folder.name }}
+                    </option>
+                </select>
+                <UButton
+                    :disabled="!chessStore.line"
+                    icon="lucide:save"
+                    label="Save"
+                    type="submit"
+                />
+            </div>
+            <p
+                v-if="saveMessage"
+                class="save-message"
+            >
+                {{ saveMessage }}
+            </p>
+        </form>
+
+        <div
+            v-else
+            class="create-folder-prompt"
+        >
+            <p>Create a folder before saving a line.</p>
+            <UButton
+                color="neutral"
+                label="Create folder"
+                size="sm"
+                to="/"
+                variant="soft"
+            />
+        </div>
     </aside>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 
+import { addOpeningLine, getOpeningFolders } from "@/lib/openingFolders.ts";
 import { useChessSounds } from "@/pages/board/composables/useChessSounds.ts";
 import { useChessStore } from "@/pages/board/store/chess.ts";
 
@@ -63,6 +112,9 @@ type TMovePair = {
 
 const chessStore = useChessStore();
 const { playUndoSound } = useChessSounds();
+const folders = getOpeningFolders();
+const selectedFolderName = ref(folders[0]?.name ?? "");
+const saveMessage = ref("");
 const movePairs = computed<Array<TMovePair>>(() => {
     const pairs: Array<TMovePair> = [];
 
@@ -77,10 +129,26 @@ const movePairs = computed<Array<TMovePair>>(() => {
     return pairs;
 });
 
+watch(() => chessStore.line, () => {
+    saveMessage.value = "";
+});
+
 function undoMove() {
     if (chessStore.undo()) {
         playUndoSound();
     }
+}
+
+function saveLine() {
+    if (!chessStore.line) {
+        return;
+    }
+
+    const lineAdded = addOpeningLine(selectedFolderName.value, chessStore.line);
+
+    saveMessage.value = lineAdded
+        ? `Saved to ${ selectedFolderName.value }.`
+        : "This line is already in that folder.";
 }
 </script>
 
@@ -156,6 +224,55 @@ function undoMove() {
         .empty-history-icon {
             color: var(--color-primary);
             font-size: var(--font-icon-xl);
+        }
+    }
+
+    .save-line,
+    .create-folder-prompt {
+        border-top: var(--length-xxxxs) solid var(--ui-border);
+        margin-top: auto;
+        padding: var(--length-m);
+    }
+
+    .save-line {
+        display: grid;
+        gap: var(--length-xs);
+
+        label {
+            font-size: var(--font-size-s);
+            font-weight: 700;
+        }
+
+        .save-controls {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: var(--length-xs);
+
+            select {
+                background: var(--color-background);
+                border: var(--length-xxxxs) solid var(--ui-border);
+                border-radius: var(--radius-s);
+                color: var(--color-text);
+                min-width: 0;
+                padding: var(--length-xs) var(--length-s);
+            }
+        }
+
+        .save-message {
+            color: var(--color-text-softer);
+            font-size: var(--font-size-s);
+        }
+    }
+
+    .create-folder-prompt {
+        display: flex;
+        gap: var(--length-s);
+        align-items: center;
+        justify-content: space-between;
+
+        p {
+            color: var(--color-text-softer);
+            font-size: var(--font-size-s);
         }
     }
 }

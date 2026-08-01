@@ -10,6 +10,7 @@ export const useChessStore = defineStore("chess", () => {
     const game = shallowRef(new Chess());
     const board = ref(createBoard());
     const history = ref<Array<Move>>([]);
+    const line = ref("");
     const isCheck = ref(false);
     const isCheckmate = ref(false);
     const isDraw = ref(false);
@@ -29,6 +30,7 @@ export const useChessStore = defineStore("chess", () => {
     function syncState() {
         board.value = createBoard();
         history.value = game.value.history({ verbose: true });
+        line.value = game.value.pgn();
         isCheck.value = game.value.isCheck();
         isCheckmate.value = game.value.isCheckmate();
         isDraw.value = game.value.isDraw();
@@ -61,6 +63,17 @@ export const useChessStore = defineStore("chess", () => {
         return undoneMove;
     }
 
+    function loadLine(savedLine: string) {
+        game.value = new Chess();
+        game.value.loadPgn(savedLine);
+        syncState();
+    }
+
+    function reset() {
+        game.value = new Chess();
+        syncState();
+    }
+
     return {
         board,
         game,
@@ -69,7 +82,10 @@ export const useChessStore = defineStore("chess", () => {
         isCheck,
         isCheckmate,
         isDraw,
+        line,
+        loadLine,
         move,
+        reset,
         turn,
         undo
     };

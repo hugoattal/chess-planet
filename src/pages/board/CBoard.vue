@@ -26,13 +26,25 @@
 
 <script setup lang="ts">
 import { WHITE } from "chess.js";
-import { computed } from "vue";
+import { computed, watch } from "vue";
+import { useRoute } from "vue-router";
 
 import CChessBoard from "@/pages/board/components/CChessBoard.vue";
 import CMoveHistory from "@/pages/board/components/CMoveHistory.vue";
 import { useChessStore } from "@/pages/board/store/chess.ts";
 
 const chessStore = useChessStore();
+const route = useRoute();
+
+watch(() => route.query.line, line => {
+    if (typeof line === "string") {
+        chessStore.loadLine(line);
+        return;
+    }
+
+    chessStore.reset();
+}, { immediate: true });
+
 const gameStatus = computed(() => {
     const player = chessStore.turn === WHITE ? "White" : "Black";
 
