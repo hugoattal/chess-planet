@@ -13,10 +13,11 @@
                     :key="boardSquare.square"
                     :aria-label="getSquareLabel(boardSquare.square, boardSquare.piece?.color, boardSquare.piece?.type)"
                     :class="getSquareClasses(boardSquare.square, rankIndex, fileIndex, Boolean(boardSquare.piece))"
+                    :disabled="isDisabled"
                     type="button"
-                    @click="selectSquare(boardSquare.square)"
-                    @dragover="allowDrop(boardSquare.square, $event)"
-                    @drop.prevent="dropPiece(boardSquare.square)"
+                    @click="selectBoardSquare(boardSquare.square)"
+                    @dragover="allowPieceDrop(boardSquare.square, $event)"
+                    @drop.prevent="dropBoardPiece(boardSquare.square)"
                 >
                     <span
                         v-if="fileIndex === 0"
@@ -39,14 +40,20 @@
                             `${boardSquare.piece.color === WHITE ? 'white' : 'black'}`,
                             { 'dragging': draggedSquare === boardSquare.square }
                         ]"
-                        :draggable="boardSquare.piece.color === chessStore.turn"
+                        :draggable="!isDisabled && boardSquare.piece.color === chessStore.turn"
                         @dragend="clearSelection"
-                        @dragstart="startDragging(boardSquare.square, $event)"
+                        @dragstart="startDraggingPiece(boardSquare.square, $event)"
                     >
                         <UIcon
                             aria-hidden="true"
                             class="piece-icon"
                             :name="pieces[boardSquare.piece.type]"
+                        />
+                        <UIcon
+                            v-if="confirmedSquare === boardSquare.square"
+                            aria-label="Correct move"
+                            class="correct-move"
+                            name="lucide:check"
                         />
                     </span>
                 </button>
@@ -56,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Color, PieceSymbol, Square } from "chess.js";
+import type { Color, Move, PieceSymbol, Square } from "chess.js";
 import { BLACK, WHITE } from "chess.js";
 import { computed } from "vue";
 
@@ -64,7 +71,18 @@ import { useChessInteraction } from "@/pages/editor/composables/useChessInteract
 import { pieces } from "@/pages/editor/lib/pieces.ts";
 import { useChessStore } from "@/pages/editor/store/chess.ts";
 
+const props = defineProps<{
+    confirmedSquare?: Square;
+    disabled?: boolean;
+}>();
+
+const emit = defineEmits<{
+    move: [move: Move];
+}>();
+
 const chessStore = useChessStore();
+const confirmedSquare = computed(() => props.confirmedSquare);
+const isDisabled = computed(() => props.disabled);
 const isBlackOrientation = computed(() => chessStore.orientation === BLACK);
 const displayedBoard = computed(() => {
     if (!isBlackOrientation.value) {
@@ -82,7 +100,34 @@ const {
     selectedSquare,
     selectSquare,
     startDragging
-} = useChessInteraction();
+} = useChessInteraction((move) => emit("move", move));
+
+function selectBoardSquare(square: Square) {
+    if (!isDisabled.value) {
+        selectSquare(square);
+    }
+}
+
+function startDraggingPiece(square: Square, event: DragEvent) {
+    if (isDisabled.value) {
+        event.preventDefault();
+        return;
+    }
+
+    startDragging(square, event);
+}
+
+function allowPieceDrop(square: Square, event: DragEvent) {
+    if (!isDisabled.value) {
+        allowDrop(square, event);
+    }
+}
+
+function dropBoardPiece(square: Square) {
+    if (!isDisabled.value) {
+        dropPiece(square);
+    }
+}
 
 function getSquareClasses(square: Square, rankIndex: number, fileIndex: number, hasPiece: boolean) {
     return {
@@ -106,6 +151,12 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
 
 <style scoped>
 .board-panel {
+    --board-light-square: color-mix(in oklab, var(--color-primary) 100%, var(--color-black));
+    --board-dark-square: color-mix(in oklab, var(--color-primary) 75%, var(--color-black));
+    --board-highlight: color-mix(in oklab, var(--color-primary) 64%, var(--color-white));
+    --board-white-piece: var(--color-white);
+    --board-black-piece: var(--color-neutral-950);
+
     display: grid;
     gap: var(--length-xs);
 
@@ -142,6 +193,14 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
 
         &:hover {
             filter: brightness(1.25);
+        }
+
+        &:disabled {
+            cursor: default;
+
+            &:hover {
+                filter: none;
+            }
         }
 
         &:focus-visible {
@@ -212,6 +271,18 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
 
             .piece-icon {
                 font-size: inherit;
+            }
+
+            .correct-move {
+                background: var(--color-primary);
+                border: var(--length-xxxs) solid var(--color-white);
+                border-radius: 50%;
+                bottom: 0;
+                color: var(--color-white);
+                font-size: var(--font-icon-m);
+                padding: var(--length-xxxs);
+                position: absolute;
+                right: calc(var(--length-xs) * -1);
             }
         }
 

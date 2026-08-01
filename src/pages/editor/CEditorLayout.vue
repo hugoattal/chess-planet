@@ -47,12 +47,6 @@ watch(() => [route.query.line, route.query.color], ([line, color]) => {
 
 <style scoped>
 .board-page {
-    --board-light-square: color-mix(in oklab, var(--color-primary) 100%, var(--color-black));
-    --board-dark-square: color-mix(in oklab, var(--color-primary) 75%, var(--color-black));
-    --board-highlight: color-mix(in oklab, var(--color-primary) 64%, var(--color-white));
-    --board-white-piece: var(--color-white);
-    --board-black-piece: var(--color-neutral-950);
-
     width: min(100%, 1160px);
     margin: 0 auto;
     padding: var(--length-xxl) var(--length-m) var(--length-xxxl);

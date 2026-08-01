@@ -41,6 +41,13 @@
                     @click="emit('delete', folder.name)"
                 />
             </div>
+            <UButton
+                block
+                class="practice-button"
+                icon="lucide:gamepad-2"
+                label="Practice"
+                :to="{ name: 'practice', query: { folder: folder.name } }"
+            />
         </article>
     </div>
 
@@ -124,6 +131,11 @@ const emit = defineEmits<{
             position: absolute;
             right: var(--length-xs);
             top: var(--length-xs);
+        }
+
+        .practice-button {
+            margin: 0 var(--length-m) var(--length-m);
+            width: calc(100% - var(--length-xl));
         }
     }
 }

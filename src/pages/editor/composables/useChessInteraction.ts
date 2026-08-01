@@ -4,7 +4,7 @@ import { computed, ref, watch } from "vue";
 import { useChessSounds } from "@/pages/editor/composables/useChessSounds.ts";
 import { useChessStore } from "@/pages/editor/store/chess.ts";
 
-export function useChessInteraction() {
+export function useChessInteraction(onMove?: (move: Move) => void) {
     const chessStore = useChessStore();
     const { playMoveSound } = useChessSounds();
     const draggedSquare = ref<Square>();
@@ -47,6 +47,7 @@ export function useChessInteraction() {
 
         clearSelection();
         playMoveSound(playedMove, chessStore.isCheck);
+        onMove?.(playedMove);
     }
 
     function startDragging(square: Square, event: DragEvent) {
