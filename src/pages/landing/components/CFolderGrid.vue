@@ -41,13 +41,22 @@
                     @click="emit('delete', folder.name)"
                 />
             </div>
-            <UButton
-                block
-                class="practice-button"
-                icon="lucide:gamepad-2"
-                label="Practice"
-                :to="{ name: 'practice', query: { folder: folder.name } }"
-            />
+            <div class="folder-buttons">
+                <UButton
+                    block
+                    icon="lucide:graduation-cap"
+                    label="Learn"
+                    :to="{ name: 'learn', query: { folder: folder.name } }"
+                />
+                <UButton
+                    block
+                    color="neutral"
+                    icon="lucide:gamepad-2"
+                    label="Practice"
+                    :to="{ name: 'practice', query: { folder: folder.name } }"
+                    variant="soft"
+                />
+            </div>
         </article>
     </div>
 
@@ -133,9 +142,11 @@ const emit = defineEmits<{
             top: var(--length-xs);
         }
 
-        .practice-button {
+        .folder-buttons {
+            display: grid;
+            gap: var(--length-xs);
+            grid-template-columns: 1fr 1fr;
             margin: 0 var(--length-m) var(--length-m);
-            width: calc(100% - var(--length-xl));
         }
     }
 }

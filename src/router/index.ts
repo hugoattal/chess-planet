@@ -19,6 +19,14 @@ const routes: Array<RouteRecordRaw> = [
         path: "/editor"
     },
     {
+        component: () => import("@/pages/learn/CLearnLayout.vue"),
+        meta: {
+            title: "Learn · Chess Planet"
+        },
+        name: "learn",
+        path: "/learn"
+    },
+    {
         component: () => import("@/pages/practice/CPracticeLayout.vue"),
         meta: {
             title: "Practice · Chess Planet"

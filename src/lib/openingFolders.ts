@@ -9,7 +9,12 @@ export type TOpeningFolder = {
 };
 
 const storageKey = "chess-planet-opening-folders";
-const storedFolders = useLocalStorage<Array<TOpeningFolder>>(storageKey, []);
+const defaultFolderFiles = import.meta.glob<Array<TOpeningFolder>>("../database/*.json", {
+    eager: true,
+    import: "default"
+});
+const defaultFolders = Object.values(defaultFolderFiles).flat();
+const storedFolders = useLocalStorage<Array<TOpeningFolder>>(storageKey, cloneFolders(defaultFolders));
 
 export function getOpeningFolders(): Array<TOpeningFolder> {
     return storedFolders.value;
@@ -86,6 +91,14 @@ export function deleteOpeningLine(folderName: string, line: string) {
     folder.lines = folder.lines.filter((savedLine) => savedLine !== line);
 }
 
+export function resetOpeningFolders() {
+    storedFolders.value = cloneFolders(defaultFolders);
+}
+
+export function clearOpeningFolders() {
+    storedFolders.value = [];
+}
+
 export function serializeOpeningFolders(folders: Array<TOpeningFolder>): string {
     return JSON.stringify(folders, null, 4);
 }
@@ -111,4 +124,11 @@ export function importOpeningFolders(serializedFolders: string): number {
     }
 
     return importedFolders.length;
+}
+
+function cloneFolders(folders: Array<TOpeningFolder>): Array<TOpeningFolder> {
+    return folders.map((folder) => ({
+        ...folder,
+        lines: [...folder.lines]
+    }));
 }

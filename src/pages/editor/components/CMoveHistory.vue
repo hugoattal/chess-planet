@@ -63,7 +63,7 @@
         </div>
 
         <form
-            v-if="folders.length"
+            v-if="showSaveLine && folders.length"
             class="save-line"
             @submit.prevent="saveLine"
         >
@@ -97,7 +97,7 @@
         </form>
 
         <div
-            v-else
+            v-else-if="showSaveLine"
             class="create-folder-prompt"
         >
             <p>Create a folder before saving a line.</p>
@@ -119,6 +119,12 @@ import { computed, ref, watch } from "vue";
 import { addOpeningLine, getOpeningFolders } from "@/lib/openingFolders.ts";
 import { useChessSounds } from "@/pages/editor/composables/useChessSounds.ts";
 import { useChessStore } from "@/pages/editor/store/chess.ts";
+
+const { showSaveLine } = withDefaults(defineProps<{
+    showSaveLine?: boolean;
+}>(), {
+    showSaveLine: true
+});
 
 type TMovePair = {
     black?: TMoveHistoryEntry;

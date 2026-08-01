@@ -64,6 +64,21 @@
             variant="soft"
             @click="emit('export-all')"
         />
+        <UButton
+            color="neutral"
+            icon="lucide:rotate-ccw"
+            label="Reset to default"
+            variant="soft"
+            @click="emit('reset-defaults')"
+        />
+        <UButton
+            color="error"
+            :disabled="folders.length === 0"
+            icon="lucide:trash-2"
+            label="Clear all"
+            variant="soft"
+            @click="emit('clear-all')"
+        />
         <input
             ref="importInput"
             accept="application/json,.json"
@@ -91,9 +106,11 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
+    "clear-all": [];
     created: [folderName: string];
     "export-all": [];
     imported: [];
+    "reset-defaults": [];
 }>();
 
 const newFolderName = ref("");

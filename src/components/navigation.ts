@@ -12,6 +12,11 @@ export const navigationItems: ArrayOrNested<NavigationMenuItem> = [
         to: "/editor"
     },
     {
+        icon: "lucide:graduation-cap",
+        label: "Learn",
+        to: "/learn"
+    },
+    {
         icon: "lucide:gamepad-2",
         label: "Practice",
         to: "/practice"

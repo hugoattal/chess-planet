@@ -8,9 +8,11 @@
         >
             <CFolderToolbar
                 :folders="folders"
+                @clear-all="clearAllFolders"
                 @created="handleFolderCreated"
                 @export-all="exportAllFolders"
                 @imported="refreshFolders"
+                @reset-defaults="resetFoldersToDefaults"
             />
             <CFolderGrid
                 :folders="folders"
@@ -34,8 +36,10 @@ import { computed, ref } from "vue";
 
 import type { TOpeningFolder } from "@/lib/openingFolders.ts";
 import {
+    clearOpeningFolders,
     deleteOpeningFolder,
     getOpeningFolders,
+    resetOpeningFolders,
     serializeOpeningFolders
 } from "@/lib/openingFolders.ts";
 import CFolderEditor from "@/pages/landing/components/CFolderEditor.vue";
@@ -80,6 +84,26 @@ function removeFolder(folderName: string) {
     if (selectedFolderName.value === folderName) {
         selectedFolderName.value = "";
     }
+}
+
+function resetFoldersToDefaults() {
+    if (!window.confirm("Replace all folders with the default folders?")) {
+        return;
+    }
+
+    resetOpeningFolders();
+    selectedFolderName.value = "";
+    refreshFolders();
+}
+
+function clearAllFolders() {
+    if (!window.confirm("Delete all folders and their lines?")) {
+        return;
+    }
+
+    clearOpeningFolders();
+    selectedFolderName.value = "";
+    refreshFolders();
 }
 
 function exportFolder(folder: TOpeningFolder) {

@@ -1,10 +1,11 @@
 import confetti from "canvas-confetti";
 import type { Color, Move, Square } from "chess.js";
-import { BLACK, Chess, WHITE } from "chess.js";
+import { BLACK, WHITE } from "chess.js";
 import type { ComputedRef } from "vue";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 
 import type { TOpeningFolder } from "@/lib/openingFolders.ts";
+import { getSuggestedArrows, movesMatch, parseOpeningLines } from "@/lib/openingLines.ts";
 import { sleep } from "@/lib/utils.ts";
 import { useChessSounds } from "@/pages/editor/composables/useChessSounds.ts";
 import type { TBoardArrow } from "@/pages/editor/lib/boardArrows.ts";
@@ -65,7 +66,7 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
             return;
         }
 
-        lineMoves.value = parseLines(activeFolder.value.lines);
+        lineMoves.value = parseOpeningLines(activeFolder.value.lines);
         activeLines.value = lineMoves.value;
 
         if (lineMoves.value.length && playerColor.value === BLACK) {
@@ -196,38 +197,6 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
     };
 }
 
-function parseLines(lines: Array<string>): Array<Array<Move>> {
-    return lines.flatMap((line) => {
-        const game = new Chess();
-
-        try {
-            game.loadPgn(line);
-            return [game.history({ verbose: true })];
-        }
-        catch {
-            return [];
-        }
-    }).filter((moves) => moves.length > 0);
-}
-
-function movesMatch(expectedMove: Move | undefined, playedMove: Move): boolean {
-    return Boolean(expectedMove && getMoveKey(expectedMove) === getMoveKey(playedMove));
-}
-
 function getMoveKey(move: Move): string {
     return `${ move.from }${ move.to }${ move.promotion ?? "" }`;
-}
-
-function getSuggestedArrows(lines: Array<Array<Move>>, moveIndex: number): Array<TBoardArrow> {
-    const arrows = new Map<string, TBoardArrow>();
-
-    for (const line of lines) {
-        const move = line[moveIndex];
-
-        if (move) {
-            arrows.set(`${ move.from }${ move.to }`, { from: move.from, to: move.to });
-        }
-    }
-
-    return [...arrows.values()];
 }
