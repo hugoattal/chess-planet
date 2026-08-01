@@ -3,7 +3,7 @@
         <header class="history-heading">
             <div>
                 <p class="eyebrow">
-                    Score sheet
+                    {{ gameStatus }}
                 </p>
                 <h2>Move history</h2>
             </div>
@@ -30,8 +30,23 @@
                 class="move-row"
             >
                 <span class="move-number">{{ movePair.number }}.</span>
-                <span class="move">{{ movePair.white }}</span>
-                <span class="move">{{ movePair.black }}</span>
+                <button
+                    :aria-label="`Go back to move ${ movePair.number }, ${ movePair.white.san }`"
+                    class="move"
+                    type="button"
+                    @click="chessStore.goToMove(movePair.white.moveCount)"
+                >
+                    {{ movePair.white.san }}
+                </button>
+                <button
+                    v-if="movePair.black"
+                    :aria-label="`Go back to move ${ movePair.number }, ${ movePair.black.san }`"
+                    class="move"
+                    type="button"
+                    @click="chessStore.goToMove(movePair.black.moveCount)"
+                >
+                    {{ movePair.black.san }}
+                </button>
             </div>
         </div>
 
@@ -98,16 +113,22 @@
 </template>
 
 <script setup lang="ts">
+import { WHITE } from "chess.js";
 import { computed, ref, watch } from "vue";
 
 import { addOpeningLine, getOpeningFolders } from "@/lib/openingFolders.ts";
-import { useChessSounds } from "@/pages/board/composables/useChessSounds.ts";
-import { useChessStore } from "@/pages/board/store/chess.ts";
+import { useChessSounds } from "@/pages/editor/composables/useChessSounds.ts";
+import { useChessStore } from "@/pages/editor/store/chess.ts";
 
 type TMovePair = {
-    black?: string;
+    black?: TMoveHistoryEntry;
     number: number;
-    white: string;
+    white: TMoveHistoryEntry;
+};
+
+type TMoveHistoryEntry = {
+    moveCount: number;
+    san: string;
 };
 
 const chessStore = useChessStore();
@@ -120,13 +141,37 @@ const movePairs = computed<Array<TMovePair>>(() => {
 
     for (let index = 0; index < chessStore.history.length; index += 2) {
         pairs.push({
-            black: chessStore.history[index + 1]?.san,
+            black: chessStore.history[index + 1] ? {
+                moveCount: index + 2,
+                san: chessStore.history[index + 1].san
+            } : undefined,
             number: index / 2 + 1,
-            white: chessStore.history[index].san
+            white: {
+                moveCount: index + 1,
+                san: chessStore.history[index].san
+            }
         });
     }
 
     return pairs;
+});
+
+const gameStatus = computed(() => {
+    const player = chessStore.turn === WHITE ? "White" : "Black";
+
+    if (chessStore.isCheckmate) {
+        return `${ player } is checkmated`;
+    }
+
+    if (chessStore.isDraw) {
+        return "Draw";
+    }
+
+    if (chessStore.isCheck) {
+        return `${ player } is in check`;
+    }
+
+    return `${ player } to move`;
 });
 
 watch(() => chessStore.line, () => {
@@ -144,11 +189,10 @@ function saveLine() {
         return;
     }
 
-    const lineAdded = addOpeningLine(selectedFolderName.value, chessStore.line);
+    const line = chessStore.line.replaceAll(/\[.+]/g, "").trim();
+    const lineAdded = addOpeningLine(selectedFolderName.value, line);
 
-    saveMessage.value = lineAdded
-        ? `Saved to ${ selectedFolderName.value }.`
-        : "This line is already in that folder.";
+    saveMessage.value = lineAdded ? `Saved to ${ selectedFolderName.value }.` : "This line is already in that folder.";
 }
 </script>
 
@@ -205,8 +249,20 @@ function saveLine() {
             }
 
             .move {
+                background: transparent;
+                border: 0;
+                border-radius: var(--radius-s);
+                color: inherit;
+                cursor: pointer;
                 font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
                 font-weight: 600;
+                padding: var(--length-xxs) var(--length-xs);
+                text-align: left;
+
+                &:hover,
+                &:focus-visible {
+                    background: var(--color-primary-softest);
+                }
             }
         }
     }

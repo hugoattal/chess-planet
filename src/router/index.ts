@@ -11,12 +11,20 @@ const routes: Array<RouteRecordRaw> = [
         path: "/"
     },
     {
-        component: () => import("@/pages/board/CBoard.vue"),
+        component: () => import("@/pages/editor/CEditorLayout.vue"),
         meta: {
-            title: "Board · Chess Planet"
+            title: "Editor · Chess Planet"
         },
-        name: "board",
-        path: "/board"
+        name: "editor",
+        path: "/editor"
+    },
+    {
+        component: () => import("@/pages/practice/CPracticeLayout.vue"),
+        meta: {
+            title: "Practice · Chess Planet"
+        },
+        name: "practice",
+        path: "/practice"
     }
 ];
 
@@ -28,10 +36,8 @@ const router = createRouter({
     }
 });
 
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to, _from) => {
     document.title = to.meta.title as string || "Chess Planet";
-
-    next();
 });
 
 export default router;

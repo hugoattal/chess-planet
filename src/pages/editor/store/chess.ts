@@ -1,5 +1,5 @@
-import type { Move, Square } from "chess.js";
-import { Chess, QUEEN } from "chess.js";
+import type { Color, Move, Square } from "chess.js";
+import { BLACK, Chess, QUEEN, WHITE } from "chess.js";
 import { defineStore } from "pinia";
 import { ref, shallowRef } from "vue";
 
@@ -14,11 +14,12 @@ export const useChessStore = defineStore("chess", () => {
     const isCheck = ref(false);
     const isCheckmate = ref(false);
     const isDraw = ref(false);
+    const orientation = ref<Color>(WHITE);
     const turn = ref(game.value.turn());
 
     function createBoard() {
-        return ranks.map(rank => files.map(file => {
-            const square = `${file}${rank}` as Square;
+        return ranks.map((rank) => files.map((file) => {
+            const square = `${ file }${ rank }` as Square;
 
             return {
                 piece: game.value.get(square),
@@ -63,10 +64,26 @@ export const useChessStore = defineStore("chess", () => {
         return undoneMove;
     }
 
+    function goToMove(moveCount: number) {
+        while (game.value.history().length > moveCount) {
+            game.value.undo();
+        }
+
+        syncState();
+    }
+
     function loadLine(savedLine: string) {
         game.value = new Chess();
         game.value.loadPgn(savedLine);
         syncState();
+    }
+
+    function setOrientation(color: Color) {
+        orientation.value = color;
+    }
+
+    function turnBoard() {
+        orientation.value = orientation.value === WHITE ? BLACK : WHITE;
     }
 
     function reset() {
@@ -78,6 +95,7 @@ export const useChessStore = defineStore("chess", () => {
         board,
         game,
         getLegalMoves,
+        goToMove,
         history,
         isCheck,
         isCheckmate,
@@ -85,8 +103,11 @@ export const useChessStore = defineStore("chess", () => {
         line,
         loadLine,
         move,
+        orientation,
         reset,
+        setOrientation,
         turn,
+        turnBoard,
         undo
     };
 });

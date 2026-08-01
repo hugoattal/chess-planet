@@ -1,8 +1,8 @@
 import type { Move, Square } from "chess.js";
 import { computed, ref, watch } from "vue";
 
-import { useChessSounds } from "@/pages/board/composables/useChessSounds.ts";
-import { useChessStore } from "@/pages/board/store/chess.ts";
+import { useChessSounds } from "@/pages/editor/composables/useChessSounds.ts";
+import { useChessStore } from "@/pages/editor/store/chess.ts";
 
 export function useChessInteraction() {
     const chessStore = useChessStore();
@@ -11,7 +11,7 @@ export function useChessInteraction() {
     const selectedSquare = ref<Square>();
     const legalMoves = ref<Array<Move>>([]);
 
-    const legalMoveSquares = computed(() => new Set(legalMoves.value.map(move => move.to)));
+    const legalMoveSquares = computed(() => new Set(legalMoves.value.map((move) => move.to)));
 
     watch(() => chessStore.history.length, clearSelection);
 
@@ -31,7 +31,7 @@ export function useChessInteraction() {
     }
 
     function selectPiece(square: Square) {
-        const boardSquare = chessStore.board.flat().find(item => item.square === square);
+        const boardSquare = chessStore.board.flat().find((item) => item.square === square);
 
         if (!boardSquare?.piece || boardSquare.piece.color !== chessStore.turn) {
             clearSelection();

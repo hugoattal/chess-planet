@@ -6,7 +6,7 @@
                     class="icon"
                     name="lucide:scale"
                 />
-                GPL-3.0 license
+                MIT license
             </p>
         </template>
 
@@ -29,9 +29,9 @@ import type { ArrayOrNested, NavigationMenuItem } from "@nuxt/ui";
 
 const items: ArrayOrNested<NavigationMenuItem> = [
     {
-        icon: "lucide:scale",
-        label: "Mentions légales",
-        to: "/legals"
+        icon: "lucide:heart",
+        label: "Sponsor",
+        to: "https://github.com/sponsors/hugoattal"
     }
 ];
 </script>

@@ -1,67 +1,78 @@
 <template>
-    <section
-        aria-label="Chess board"
-        class="chess-board"
-    >
-        <template
-            v-for="(rank, rankIndex) in chessStore.board"
-            :key="rankIndex"
+    <div class="board-panel">
+        <section
+            aria-label="Chess board"
+            class="chess-board"
         >
-            <button
-                v-for="(boardSquare, fileIndex) in rank"
-                :key="boardSquare.square"
-                :aria-label="getSquareLabel(boardSquare.square, boardSquare.piece?.color, boardSquare.piece?.type)"
-                :class="getSquareClasses(boardSquare.square, rankIndex, fileIndex, Boolean(boardSquare.piece))"
-                type="button"
-                @click="selectSquare(boardSquare.square)"
-                @dragover="allowDrop(boardSquare.square, $event)"
-                @drop.prevent="dropPiece(boardSquare.square)"
+            <template
+                v-for="(rank, rankIndex) in displayedBoard"
+                :key="rankIndex"
             >
-                <span
-                    v-if="fileIndex === 0"
-                    class="coordinate rank"
+                <button
+                    v-for="(boardSquare, fileIndex) in rank"
+                    :key="boardSquare.square"
+                    :aria-label="getSquareLabel(boardSquare.square, boardSquare.piece?.color, boardSquare.piece?.type)"
+                    :class="getSquareClasses(boardSquare.square, rankIndex, fileIndex, Boolean(boardSquare.piece))"
+                    type="button"
+                    @click="selectSquare(boardSquare.square)"
+                    @dragover="allowDrop(boardSquare.square, $event)"
+                    @drop.prevent="dropPiece(boardSquare.square)"
                 >
-                    {{ boardSquare.square[1] }}
-                </span>
-                <span
-                    v-if="rankIndex === 7"
-                    class="coordinate file"
-                >
-                    {{ boardSquare.square[0] }}
-                </span>
+                    <span
+                        v-if="fileIndex === 0"
+                        class="coordinate rank"
+                    >
+                        {{ boardSquare.square[1] }}
+                    </span>
+                    <span
+                        v-if="rankIndex === 7"
+                        class="coordinate file"
+                    >
+                        {{ boardSquare.square[0] }}
+                    </span>
 
-                <span
-                    v-if="boardSquare.piece"
-                    :aria-grabbed="draggedSquare === boardSquare.square"
-                    :class="[
-                        'piece',
-                        `${boardSquare.piece.color === WHITE ? 'white' : 'black'}`,
-                        { 'dragging': draggedSquare === boardSquare.square }
-                    ]"
-                    :draggable="boardSquare.piece.color === chessStore.turn"
-                    @dragend="clearSelection"
-                    @dragstart="startDragging(boardSquare.square, $event)"
-                >
-                    <UIcon
-                        aria-hidden="true"
-                        class="piece-icon"
-                        :name="pieces[boardSquare.piece.type]"
-                    />
-                </span>
-            </button>
-        </template>
-    </section>
+                    <span
+                        v-if="boardSquare.piece"
+                        :aria-grabbed="draggedSquare === boardSquare.square"
+                        :class="[
+                            'piece',
+                            `${boardSquare.piece.color === WHITE ? 'white' : 'black'}`,
+                            { 'dragging': draggedSquare === boardSquare.square }
+                        ]"
+                        :draggable="boardSquare.piece.color === chessStore.turn"
+                        @dragend="clearSelection"
+                        @dragstart="startDragging(boardSquare.square, $event)"
+                    >
+                        <UIcon
+                            aria-hidden="true"
+                            class="piece-icon"
+                            :name="pieces[boardSquare.piece.type]"
+                        />
+                    </span>
+                </button>
+            </template>
+        </section>
+    </div>
 </template>
 
 <script setup lang="ts">
 import type { Color, PieceSymbol, Square } from "chess.js";
-import { WHITE } from "chess.js";
+import { BLACK, WHITE } from "chess.js";
+import { computed } from "vue";
 
-import { useChessInteraction } from "@/pages/board/composables/useChessInteraction.ts";
-import { pieces } from "@/pages/board/lib/pieces.ts";
-import { useChessStore } from "@/pages/board/store/chess.ts";
+import { useChessInteraction } from "@/pages/editor/composables/useChessInteraction.ts";
+import { pieces } from "@/pages/editor/lib/pieces.ts";
+import { useChessStore } from "@/pages/editor/store/chess.ts";
 
 const chessStore = useChessStore();
+const isBlackOrientation = computed(() => chessStore.orientation === BLACK);
+const displayedBoard = computed(() => {
+    if (!isBlackOrientation.value) {
+        return chessStore.board;
+    }
+
+    return [...chessStore.board].reverse().map((rank) => [...rank].reverse());
+});
 const {
     allowDrop,
     clearSelection,
@@ -94,6 +105,16 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
 </script>
 
 <style scoped>
+.board-panel {
+    display: grid;
+    gap: var(--length-xs);
+
+    .board-toolbar {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
 .chess-board {
     border: var(--length-xxxs) solid color-mix(in oklab, var(--color-primary) 54%, var(--ui-border));
     border-radius: var(--radius-m);

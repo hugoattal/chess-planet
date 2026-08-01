@@ -10,6 +10,8 @@
     },
     "dependencies": {
         "@nuxt/ui": "^4.10.0",
+        "@vueuse/core": "^14.4.0",
+        "canvas-confetti": "^1.9.4",
         "chess.js": "^1.4.0",
         "pinia": "^4.0.2",
         "tailwindcss": "^4.3.3",
