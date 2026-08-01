@@ -2,7 +2,7 @@
     <div class="logo">
         <UIcon
             class="icon"
-            name="lucide:chess-king"
+            name="fa7-solid:chess"
         />
         <div class="text">
             Chess Planet

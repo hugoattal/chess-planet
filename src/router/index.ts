@@ -9,6 +9,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         name: "landing",
         path: "/"
+    },
+    {
+        component: () => import("@/pages/board/CBoard.vue"),
+        meta: {
+            title: "Board · Chess Planet"
+        },
+        name: "board",
+        path: "/board"
     }
 ];
 
