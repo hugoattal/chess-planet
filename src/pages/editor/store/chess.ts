@@ -1,7 +1,7 @@
 import type { Color, Move, Square } from "chess.js";
 import { BLACK, Chess, QUEEN, WHITE } from "chess.js";
 import { defineStore } from "pinia";
-import { ref, shallowRef } from "vue";
+import { computed, ref, shallowRef } from "vue";
 
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
 const ranks = [8, 7, 6, 5, 4, 3, 2, 1] as const;
@@ -10,12 +10,15 @@ export const useChessStore = defineStore("chess", () => {
     const game = shallowRef(new Chess());
     const board = ref(createBoard());
     const history = ref<Array<Move>>([]);
+    const currentMove = ref(0);
     const line = ref("");
     const isCheck = ref(false);
     const isCheckmate = ref(false);
     const isDraw = ref(false);
     const orientation = ref<Color>(WHITE);
     const turn = ref(game.value.turn());
+    const canGoBackward = computed(() => currentMove.value > 0);
+    const canGoForward = computed(() => currentMove.value < history.value.length);
 
     function createBoard() {
         return ranks.map((rank) => files.map((file) => {
@@ -28,14 +31,19 @@ export const useChessStore = defineStore("chess", () => {
         }));
     }
 
-    function syncState() {
+    function syncPosition() {
         board.value = createBoard();
-        history.value = game.value.history({ verbose: true });
-        line.value = game.value.pgn();
         isCheck.value = game.value.isCheck();
         isCheckmate.value = game.value.isCheckmate();
         isDraw.value = game.value.isDraw();
         turn.value = game.value.turn();
+    }
+
+    function replaceHistory() {
+        history.value = game.value.history({ verbose: true });
+        currentMove.value = history.value.length;
+        line.value = game.value.pgn();
+        syncPosition();
     }
 
     function getLegalMoves(square: Square): Array<Move> {
@@ -43,13 +51,20 @@ export const useChessStore = defineStore("chess", () => {
     }
 
     function move(from: Square, to: Square): Move {
+        const expectedMove = history.value[currentMove.value];
         const playedMove = game.value.move({
             from,
             promotion: QUEEN,
             to
         });
 
-        syncState();
+        if (movesMatch(expectedMove, playedMove)) {
+            currentMove.value += 1;
+            syncPosition();
+        }
+        else {
+            replaceHistory();
+        }
 
         return playedMove;
     }
@@ -58,24 +73,52 @@ export const useChessStore = defineStore("chess", () => {
         const undoneMove = game.value.undo();
 
         if (undoneMove) {
-            syncState();
+            replaceHistory();
         }
 
         return undoneMove;
     }
 
     function goToMove(moveCount: number) {
-        while (game.value.history().length > moveCount) {
+        while (currentMove.value > moveCount) {
             game.value.undo();
+            currentMove.value -= 1;
         }
 
-        syncState();
+        while (currentMove.value < moveCount) {
+            const move = history.value[currentMove.value];
+
+            game.value.move({
+                from: move.from,
+                promotion: move.promotion,
+                to: move.to
+            });
+            currentMove.value += 1;
+        }
+
+        syncPosition();
+    }
+
+    function goToStart() {
+        goToMove(0);
+    }
+
+    function goBackward() {
+        goToMove(currentMove.value - 1);
+    }
+
+    function goForward() {
+        goToMove(currentMove.value + 1);
+    }
+
+    function goToEnd() {
+        goToMove(history.value.length);
     }
 
     function loadLine(savedLine: string) {
         game.value = new Chess();
         game.value.loadPgn(savedLine);
-        syncState();
+        replaceHistory();
     }
 
     function setOrientation(color: Color) {
@@ -88,14 +131,21 @@ export const useChessStore = defineStore("chess", () => {
 
     function reset() {
         game.value = new Chess();
-        syncState();
+        replaceHistory();
     }
 
     return {
         board,
+        canGoBackward,
+        canGoForward,
+        currentMove,
         game,
         getLegalMoves,
+        goBackward,
+        goForward,
+        goToEnd,
         goToMove,
+        goToStart,
         history,
         isCheck,
         isCheckmate,
@@ -111,3 +161,12 @@ export const useChessStore = defineStore("chess", () => {
         undo
     };
 });
+
+function movesMatch(expectedMove: Move | undefined, playedMove: Move): boolean {
+    return Boolean(
+        expectedMove &&
+        expectedMove.from === playedMove.from &&
+        expectedMove.to === playedMove.to &&
+        expectedMove.promotion === playedMove.promotion
+    );
+}

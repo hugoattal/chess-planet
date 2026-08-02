@@ -11,12 +11,13 @@ export function useOpeningLearn(activeFolder: ComputedRef<TOpeningFolder | undef
     const chessStore = useChessStore();
     const saveMessage = ref("");
     const lineMoves = computed(() => parseOpeningLines(activeFolder.value?.lines ?? []));
+    const currentHistory = computed(() => chessStore.history.slice(0, chessStore.currentMove));
     const matchingLines = computed(() => (
-        lineMoves.value.filter((line) => lineMatchesHistory(line, chessStore.history))
+        lineMoves.value.filter((line) => lineMatchesHistory(line, currentHistory.value))
     ));
-    const suggestedArrows = computed(() => getSuggestedArrows(matchingLines.value, chessStore.history.length));
+    const suggestedArrows = computed(() => getSuggestedArrows(matchingLines.value, chessStore.currentMove));
     const hasLines = computed(() => lineMoves.value.length > 0);
-    const isOutsideLines = computed(() => chessStore.history.length > 0 && matchingLines.value.length === 0);
+    const isOutsideLines = computed(() => chessStore.currentMove > 0 && matchingLines.value.length === 0);
 
     watch(activeFolder, startLearning, { immediate: true });
     watch(() => chessStore.line, () => {

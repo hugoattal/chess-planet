@@ -14,6 +14,7 @@
                     />
                 </div>
                 <CMoveHistory />
+                <CMoveNavigation />
             </div>
         </div>
     </main>
@@ -26,6 +27,7 @@ import { useRoute } from "vue-router";
 
 import CChessBoard from "@/pages/editor/components/CChessBoard.vue";
 import CMoveHistory from "@/pages/editor/components/CMoveHistory.vue";
+import CMoveNavigation from "@/pages/editor/components/CMoveNavigation.vue";
 import { useChessStore } from "@/pages/editor/store/chess.ts";
 
 const chessStore = useChessStore();

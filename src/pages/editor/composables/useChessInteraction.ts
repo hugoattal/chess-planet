@@ -13,7 +13,7 @@ export function useChessInteraction(onMove?: (move: Move) => void) {
 
     const legalMoveSquares = computed(() => new Set(legalMoves.value.map((move) => move.to)));
 
-    watch(() => chessStore.history.length, clearSelection);
+    watch(() => chessStore.currentMove, clearSelection);
 
     function clearSelection() {
         draggedSquare.value = undefined;

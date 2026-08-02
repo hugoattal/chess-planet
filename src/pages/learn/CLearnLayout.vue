@@ -49,12 +49,13 @@
                         :arrow-count="suggestedArrows.length"
                         :folder-name="activeFolder.name"
                         :is-outside-lines="isOutsideLines"
-                        :move-count="chessStore.history.length"
+                        :move-count="chessStore.currentMove"
                         :save-message="saveMessage"
                         :turn-label="turnLabel"
                         @add-line="addCurrentLine"
                     />
                     <CMoveHistory :show-save-line="false" />
+                    <CMoveNavigation />
                 </div>
             </div>
 
@@ -87,6 +88,7 @@ import { useRoute } from "vue-router";
 import { getOpeningFolders } from "@/lib/openingFolders.ts";
 import CChessBoard from "@/pages/editor/components/CChessBoard.vue";
 import CMoveHistory from "@/pages/editor/components/CMoveHistory.vue";
+import CMoveNavigation from "@/pages/editor/components/CMoveNavigation.vue";
 import { useChessStore } from "@/pages/editor/store/chess.ts";
 import CLearnFolderPicker from "@/pages/learn/components/CLearnFolderPicker.vue";
 import CLearnGuide from "@/pages/learn/components/CLearnGuide.vue";

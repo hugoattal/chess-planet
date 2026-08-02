@@ -11,7 +11,7 @@
             <UButton
                 aria-label="Undo the last move"
                 color="neutral"
-                :disabled="chessStore.history.length === 0"
+                :disabled="chessStore.currentMove === 0"
                 icon="lucide:undo-2"
                 label="Take back"
                 size="sm"
@@ -31,7 +31,7 @@
             >
                 <span class="move-number">{{ movePair.number }}.</span>
                 <button
-                    :aria-label="`Go back to move ${ movePair.number }, ${ movePair.white.san }`"
+                    :aria-label="`Go to move ${ movePair.number }, ${ movePair.white.san }`"
                     class="move"
                     type="button"
                     @click="chessStore.goToMove(movePair.white.moveCount)"
@@ -40,7 +40,7 @@
                 </button>
                 <button
                     v-if="movePair.black"
-                    :aria-label="`Go back to move ${ movePair.number }, ${ movePair.black.san }`"
+                    :aria-label="`Go to move ${ movePair.number }, ${ movePair.black.san }`"
                     class="move"
                     type="button"
                     @click="chessStore.goToMove(movePair.black.moveCount)"
@@ -185,9 +185,8 @@ watch(() => chessStore.line, () => {
 });
 
 function undoMove() {
-    if (chessStore.undo()) {
-        playUndoSound();
-    }
+    chessStore.goBackward();
+    playUndoSound();
 }
 
 function saveLine() {
