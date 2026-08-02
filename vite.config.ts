@@ -4,6 +4,8 @@ import ui from "@nuxt/ui/vite";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
 
+import { githubFallbackPlugin } from "@/githubFallback.plugin.ts";
+
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [
@@ -15,7 +17,8 @@ export default defineConfig({
                     primary: "indigo"
                 }
             }
-        })
+        }),
+        githubFallbackPlugin()
     ],
     resolve: {
         alias: {
