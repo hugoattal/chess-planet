@@ -12,7 +12,7 @@
                 color="neutral"
                 icon="cib:github"
                 target="_blank"
-                to="https://github.com/hugoattal/chess-planet"
+                to="https://github.com/chessplanet/chessplanet"
                 variant="ghost"
             />
         </template>

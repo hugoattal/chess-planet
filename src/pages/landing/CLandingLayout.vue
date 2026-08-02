@@ -111,7 +111,7 @@ function exportFolder(folder: TOpeningFolder) {
 }
 
 function exportAllFolders() {
-    downloadFolders(folders.value, "chess-planet-folders.json");
+    downloadFolders(folders.value, "chessplanet-folders.json");
 }
 
 function downloadFolders(exportedFolders: Array<TOpeningFolder>, fileName: string) {

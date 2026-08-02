@@ -8,7 +8,7 @@ export type TOpeningFolder = {
     name: string;
 };
 
-const storageKey = "chess-planet-opening-folders";
+const storageKey = "chessplanet-opening-folders";
 const defaultFolderFiles = import.meta.glob<Array<TOpeningFolder>>("../database/*.json", {
     eager: true,
     import: "default"
