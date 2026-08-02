@@ -5,7 +5,13 @@ import type { ComputedRef } from "vue";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 
 import type { TOpeningFolder } from "@/lib/openingFolders.ts";
-import { getSuggestedArrows, movesMatch, parseOpeningLines } from "@/lib/openingLines.ts";
+import {
+    getContinuingMoves,
+    getMatchingLines,
+    getSuggestedArrows,
+    movesMatch,
+    parseOpeningLines
+} from "@/lib/openingLines.ts";
 import { sleep } from "@/lib/utils.ts";
 import { useChessSounds } from "@/pages/editor/composables/useChessSounds.ts";
 import type { TBoardArrow } from "@/pages/editor/lib/boardArrows.ts";
@@ -75,15 +81,16 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
     }
 
     function handlePlayerMove(move: Move) {
-        const moveIndex = chessStore.history.length - 1;
-        const matchingLines = activeLines.value.filter((line) => movesMatch(line[moveIndex], move));
+        const previousHistory = chessStore.history.slice(0, -1);
+        const moveMatches = getContinuingMoves(lineMoves.value, previousHistory)
+            .some((expectedMove) => movesMatch(expectedMove, move));
 
-        if (!matchingLines.length) {
-            void reviewMistake(moveIndex);
+        if (!moveMatches) {
+            void reviewMistake();
             return;
         }
 
-        activeLines.value = matchingLines;
+        activeLines.value = getMatchingLines(lineMoves.value, chessStore.history);
         confirmedSquare.value = move.to;
         void queueOpponentMove();
     }
@@ -99,7 +106,7 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
         }
     }
 
-    async function reviewMistake(moveIndex: number) {
+    async function reviewMistake() {
         reviewingMistake.value = true;
         const actionId = ++pendingActionId;
 
@@ -110,7 +117,7 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
         }
 
         chessStore.undo();
-        suggestedArrows.value = getSuggestedArrows(activeLines.value, moveIndex);
+        suggestedArrows.value = getSuggestedArrows(lineMoves.value, chessStore.history);
 
         await sleep(mistakeResultDelay);
 
@@ -122,15 +129,10 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
     function playOpponentMove() {
         confirmedSquare.value = undefined;
 
-        const moveIndex = chessStore.history.length;
         const possibleMoves = new Map<string, Move>();
 
-        for (const line of activeLines.value) {
-            const move = line[moveIndex];
-
-            if (move) {
-                possibleMoves.set(getMoveKey(move), move);
-            }
+        for (const move of getContinuingMoves(lineMoves.value, chessStore.history)) {
+            possibleMoves.set(getMoveKey(move), move);
         }
 
         if (!possibleMoves.size) {
@@ -141,12 +143,11 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
         const choices = [...possibleMoves.values()];
         const selectedMove = choices[Math.floor(Math.random() * choices.length)];
 
-        activeLines.value = activeLines.value.filter((line) => movesMatch(line[moveIndex], selectedMove));
-
         const playedMove = chessStore.move(selectedMove.from, selectedMove.to);
         playMoveSound(playedMove, chessStore.isCheck);
+        activeLines.value = getMatchingLines(lineMoves.value, chessStore.history);
 
-        if (!activeLines.value.some((line) => line[chessStore.history.length])) {
+        if (!getContinuingMoves(lineMoves.value, chessStore.history).length) {
             finishPractice("win");
             return;
         }

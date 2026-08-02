@@ -4,7 +4,7 @@ import { computed, ref, watch } from "vue";
 
 import type { TOpeningFolder } from "@/lib/openingFolders.ts";
 import { addOpeningLine } from "@/lib/openingFolders.ts";
-import { getSuggestedArrows, lineMatchesHistory, parseOpeningLines } from "@/lib/openingLines.ts";
+import { getMatchingLines, getSuggestedArrows, parseOpeningLines } from "@/lib/openingLines.ts";
 import { useChessStore } from "@/pages/editor/store/chess.ts";
 
 export function useOpeningLearn(activeFolder: ComputedRef<TOpeningFolder | undefined>) {
@@ -13,9 +13,9 @@ export function useOpeningLearn(activeFolder: ComputedRef<TOpeningFolder | undef
     const lineMoves = computed(() => parseOpeningLines(activeFolder.value?.lines ?? []));
     const currentHistory = computed(() => chessStore.history.slice(0, chessStore.currentMove));
     const matchingLines = computed(() => (
-        lineMoves.value.filter((line) => lineMatchesHistory(line, currentHistory.value))
+        getMatchingLines(lineMoves.value, currentHistory.value)
     ));
-    const suggestedArrows = computed(() => getSuggestedArrows(matchingLines.value, chessStore.currentMove));
+    const suggestedArrows = computed(() => getSuggestedArrows(matchingLines.value, currentHistory.value));
     const hasLines = computed(() => lineMoves.value.length > 0);
     const isOutsideLines = computed(() => chessStore.currentMove > 0 && matchingLines.value.length === 0);
 

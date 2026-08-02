@@ -35,16 +35,6 @@
                     :arrows="suggestedArrows"
                 />
                 <div class="side">
-                    <div class="board-actions">
-                        <UButton
-                            color="neutral"
-                            icon="lucide:refresh-cw"
-                            :label="isBlackOrientation ? 'View as white' : 'View as black'"
-                            size="sm"
-                            variant="soft"
-                            @click="chessStore.turnBoard"
-                        />
-                    </div>
                     <CLearnGuide
                         :arrow-count="suggestedArrows.length"
                         :folder-name="activeFolder.name"
@@ -107,7 +97,6 @@ const activeFolder = computed(() => {
 
     return folders.find((folder) => folder.name === folderName);
 });
-const isBlackOrientation = computed(() => chessStore.orientation === BLACK);
 const turnLabel = computed(() => chessStore.turn === WHITE ? "White" : "Black");
 const {
     addCurrentLine,
@@ -165,12 +154,10 @@ const {
         align-items: start;
 
         .side {
-            display: grid;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             gap: var(--length-xs);
-
-            .board-actions {
-                display: flex;
-            }
         }
     }
 }

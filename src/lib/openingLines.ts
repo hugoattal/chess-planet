@@ -21,22 +21,40 @@ export function movesMatch(expectedMove: Move | undefined, playedMove: Move): bo
     return Boolean(expectedMove && getMoveKey(expectedMove) === getMoveKey(playedMove));
 }
 
-export function lineMatchesHistory(line: Array<Move>, history: Array<Move>): boolean {
-    return history.every((move, index) => movesMatch(line[index], move));
+export function getMatchingLines(lines: Array<Array<Move>>, history: Array<Move>): Array<Array<Move>> {
+    if (!history.length) {
+        return lines;
+    }
+
+    const position = getPositionKey(history.at(-1)!.after);
+
+    return lines.filter((line) => line.some((move) => (
+        getPositionKey(move.before) === position || getPositionKey(move.after) === position
+    )));
 }
 
-export function getSuggestedArrows(lines: Array<Array<Move>>, moveIndex: number): Array<TBoardArrow> {
+export function getContinuingMoves(lines: Array<Array<Move>>, history: Array<Move>): Array<Move> {
+    if (!history.length) {
+        return lines.map((line) => line[0]);
+    }
+
+    const position = getPositionKey(history.at(-1)!.after);
+
+    return lines.flatMap((line) => line.filter((move) => getPositionKey(move.before) === position));
+}
+
+export function getSuggestedArrows(lines: Array<Array<Move>>, history: Array<Move>): Array<TBoardArrow> {
     const arrows = new Map<string, TBoardArrow>();
 
-    for (const line of lines) {
-        const move = line[moveIndex];
-
-        if (move) {
-            arrows.set(`${ move.from }${ move.to }`, { from: move.from, to: move.to });
-        }
+    for (const move of getContinuingMoves(lines, history)) {
+        arrows.set(`${ move.from }${ move.to }`, { from: move.from, to: move.to });
     }
 
     return [...arrows.values()];
+}
+
+function getPositionKey(fen: string): string {
+    return fen.split(" ", 4).join(" ");
 }
 
 function getMoveKey(move: Move): string {

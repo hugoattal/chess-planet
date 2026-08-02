@@ -209,6 +209,7 @@ function saveLine() {
     flex-direction: column;
     min-height: 420px;
     height: 100%;
+    flex: 1 1 0;
     overflow: hidden;
 
     .history-heading {

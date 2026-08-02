@@ -1,8 +1,5 @@
 <template>
     <aside class="learn-guide">
-        <p class="eyebrow">
-            {{ turnLabel }} to move
-        </p>
         <h2>Follow the arrows</h2>
 
         <template v-if="isOutsideLines">

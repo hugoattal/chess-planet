@@ -3,7 +3,7 @@
         <p class="eyebrow">
             Opening practice
         </p>
-        <h1>Learn chess openings by repetition.</h1>
+        <h1>Learn chess openings</h1>
         <p>
             Chess Planet lets you practise openings repeatedly against randomized registered lines.
         </p>

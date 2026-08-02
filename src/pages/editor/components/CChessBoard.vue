@@ -174,7 +174,7 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
 }
 
 .chess-board {
-    border: var(--length-xxxs) solid color-mix(in oklab, var(--color-primary) 54%, var(--ui-border));
+    border: var(--length-xxs) solid var(--board-dark-square);
     border-radius: var(--radius-m);
     display: grid;
     grid-template-columns: repeat(8, 1fr);
