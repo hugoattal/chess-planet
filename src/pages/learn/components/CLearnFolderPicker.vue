@@ -8,28 +8,37 @@
     </header>
 
     <div
-        v-if="folders.length"
-        class="learn-folders"
+        v-if="folderGroups.length"
+        class="folder-groups"
     >
-        <article
-            v-for="folder in folders"
-            :key="folder.name"
-            class="learn-folder"
+        <section
+            v-for="group in folderGroups"
+            :key="group.title"
+            class="folder-group"
         >
-            <UIcon
-                aria-hidden="true"
-                class="folder-icon"
-                name="lucide:folder"
-            />
-            <h2>{{ folder.name }}</h2>
-            <p>{{ folder.lines.length }} {{ folder.lines.length === 1 ? "line" : "lines" }} · Play both sides</p>
-            <UButton
-                block
-                icon="lucide:graduation-cap"
-                label="Learn"
-                :to="{ name: 'learn', query: { folder: folder.name } }"
-            />
-        </article>
+            <h2>{{ group.title }}</h2>
+            <div class="learn-folders">
+                <article
+                    v-for="folder in group.folders"
+                    :key="folder.name"
+                    class="learn-folder"
+                >
+                    <UIcon
+                        aria-hidden="true"
+                        class="folder-icon"
+                        name="lucide:folder"
+                    />
+                    <h3>{{ folder.name }}</h3>
+                    <p>{{ folder.lines.length }} {{ folder.lines.length === 1 ? "line" : "lines" }} · Play both sides</p>
+                    <UButton
+                        block
+                        icon="lucide:graduation-cap"
+                        label="Learn"
+                        :to="{ name: 'learn', query: { folder: folder.name } }"
+                    />
+                </article>
+            </div>
+        </section>
     </div>
 
     <CPracticeEmptyState
@@ -47,12 +56,25 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+
 import type { TOpeningFolder } from "@/lib/openingFolders.ts";
 import CPracticeEmptyState from "@/pages/practice/components/CPracticeEmptyState.vue";
 
-defineProps<{
+type TFolderGroup = {
     folders: Array<TOpeningFolder>;
+    title: string;
+};
+
+const props = defineProps<{
+    folders: Array<TOpeningFolder>;
+    presets: Array<TOpeningFolder>;
 }>();
+
+const folderGroups = computed<Array<TFolderGroup>>(() => [
+    { folders: props.folders, title: "Your library" },
+    { folders: props.presets, title: "Presets" }
+].filter((group) => group.folders.length));
 </script>
 
 <style scoped>
@@ -79,33 +101,48 @@ defineProps<{
     }
 }
 
-.learn-folders {
+.folder-groups {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--length-m);
+    gap: var(--length-xl);
 
-    .learn-folder {
-        background: var(--color-background-soft);
-        border: var(--length-xxxxs) solid var(--ui-border);
-        border-radius: var(--radius-m);
+    .folder-group {
         display: grid;
-        gap: var(--length-s);
-        padding: var(--length-l);
+        gap: var(--length-m);
 
-        .folder-icon {
-            color: var(--color-primary);
-            font-size: var(--font-icon-xl);
-        }
-
-        h2 {
+        > h2 {
             font-size: var(--font-size-xl);
             font-weight: 700;
         }
 
-        p {
-            color: var(--color-text-softer);
-            font-size: var(--font-size-s);
-            margin-bottom: var(--length-xs);
+        .learn-folders {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: var(--length-m);
+
+            .learn-folder {
+                background: var(--color-background-soft);
+                border: var(--length-xxxxs) solid var(--ui-border);
+                border-radius: var(--radius-m);
+                display: grid;
+                gap: var(--length-s);
+                padding: var(--length-l);
+
+                .folder-icon {
+                    color: var(--color-primary);
+                    font-size: var(--font-icon-xl);
+                }
+
+                h3 {
+                    font-size: var(--font-size-xl);
+                    font-weight: 700;
+                }
+
+                p {
+                    color: var(--color-text-softer);
+                    font-size: var(--font-size-s);
+                    margin-bottom: var(--length-xs);
+                }
+            }
         }
     }
 }

@@ -43,6 +43,7 @@
         <CPracticeFolderPicker
             v-else
             :folders="folders"
+            :presets="presets"
         />
 
         <CPracticeResult
@@ -60,7 +61,7 @@
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import { getOpeningFolders } from "@/lib/openingFolders.ts";
+import { getOpeningFolder, getOpeningFolders, getOpeningPresets } from "@/lib/openingFolders.ts";
 import CChessBoard from "@/pages/editor/components/CChessBoard.vue";
 import CPracticeEmptyState from "@/pages/practice/components/CPracticeEmptyState.vue";
 import CPracticeFolderPicker from "@/pages/practice/components/CPracticeFolderPicker.vue";
@@ -72,6 +73,7 @@ import { useOpeningPractice } from "@/pages/practice/composables/useOpeningPract
 const route = useRoute();
 const isResultOpen = ref(false);
 const folders = getOpeningFolders();
+const presets = getOpeningPresets();
 const activeFolder = computed(() => {
     const folderName = route.query.folder;
 
@@ -79,7 +81,7 @@ const activeFolder = computed(() => {
         return undefined;
     }
 
-    return folders.find((folder) => folder.name === folderName);
+    return getOpeningFolder(folderName);
 });
 const {
     activeLineCount,

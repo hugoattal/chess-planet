@@ -37,6 +37,7 @@
                 <div class="side">
                     <CLearnGuide
                         :arrow-count="suggestedArrows.length"
+                        :can-add-line="!activeFolderIsPreset"
                         :folder-name="activeFolder.name"
                         :is-outside-lines="isOutsideLines"
                         :move-count="chessStore.currentMove"
@@ -66,6 +67,7 @@
         <CLearnFolderPicker
             v-else
             :folders="folders"
+            :presets="presets"
         />
     </main>
 </template>
@@ -75,7 +77,12 @@ import { WHITE } from "chess.js";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
-import { getOpeningFolders } from "@/lib/openingFolders.ts";
+import {
+    getOpeningFolder,
+    getOpeningFolders,
+    getOpeningPresets,
+    isOpeningPreset
+} from "@/lib/openingFolders.ts";
 import CChessBoard from "@/pages/editor/components/CChessBoard.vue";
 import CMoveHistory from "@/pages/editor/components/CMoveHistory.vue";
 import CMoveNavigation from "@/pages/editor/components/CMoveNavigation.vue";
@@ -88,6 +95,7 @@ import CPracticeEmptyState from "@/pages/practice/components/CPracticeEmptyState
 const route = useRoute();
 const chessStore = useChessStore();
 const folders = getOpeningFolders();
+const presets = getOpeningPresets();
 const activeFolder = computed(() => {
     const folderName = route.query.folder;
 
@@ -95,8 +103,9 @@ const activeFolder = computed(() => {
         return undefined;
     }
 
-    return folders.find((folder) => folder.name === folderName);
+    return getOpeningFolder(folderName);
 });
+const activeFolderIsPreset = computed(() => activeFolder.value ? isOpeningPreset(activeFolder.value.name) : false);
 const turnLabel = computed(() => chessStore.turn === WHITE ? "White" : "Black");
 const {
     addCurrentLine,

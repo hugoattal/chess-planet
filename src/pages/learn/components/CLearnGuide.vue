@@ -5,11 +5,13 @@
         <template v-if="isOutsideLines">
             <p>This position is outside every saved line in {{ folderName }}.</p>
             <UButton
+                v-if="canAddLine"
                 block
                 icon="lucide:file-plus-2"
                 label="Add this line"
                 @click="emit('add-line')"
             />
+            <p v-else>Duplicate this preset into your library to add your own lines.</p>
         </template>
         <p v-else-if="arrowCount">
             {{ arrowCount }} saved {{ arrowCount === 1 ? "move is" : "moves are" }} available. Play either side to explore the folder.
@@ -33,6 +35,7 @@
 <script setup lang="ts">
 defineProps<{
     arrowCount: number;
+    canAddLine: boolean;
     folderName: string;
     isOutsideLines: boolean;
     moveCount: number;

@@ -2,6 +2,11 @@
     <main class="landing-page">
         <CLandingIntroduction />
 
+        <CFolderControls
+            v-model:search-query="searchQuery"
+            @created="handleFolderCreated"
+        />
+
         <section
             aria-labelledby="folders-title"
             class="folders-section"
@@ -9,17 +14,17 @@
             <CFolderToolbar
                 :folders="folders"
                 @clear-all="clearAllFolders"
-                @created="handleFolderCreated"
                 @export-all="exportAllFolders"
                 @imported="refreshFolders"
-                @reset-defaults="resetFoldersToDefaults"
             />
             <CFolderGrid
-                :folders="folders"
+                :empty-message="emptyLibraryMessage"
+                :folders="filteredFolders"
                 :selected-folder-name="selectedFolderName"
                 @delete="removeFolder"
                 @export="exportFolder"
                 @select="selectFolder"
+                @unselect="unselectFolder"
             />
             <CFolderEditor
                 v-if="selectedFolder"
@@ -28,28 +33,63 @@
                 @renamed="handleFolderRenamed"
             />
         </section>
+
+        <section
+            aria-labelledby="presets-title"
+            class="folders-section"
+        >
+            <header class="category-heading">
+                <p class="eyebrow">
+                    Ready to use
+                </p>
+                <h2 id="presets-title">
+                    Presets
+                </h2>
+                <p>Presets always stay available. Duplicate one to customize it in your library.</p>
+            </header>
+            <CFolderGrid
+                empty-message="No presets match your search."
+                :folders="filteredPresets"
+                preset
+                @duplicate="duplicatePreset"
+            />
+        </section>
     </main>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 import type { TOpeningFolder } from "@/lib/openingFolders.ts";
 import {
     clearOpeningFolders,
     deleteOpeningFolder,
+    duplicateOpeningPreset,
     getOpeningFolders,
-    resetOpeningFolders,
+    getOpeningPresets,
     serializeOpeningFolders
 } from "@/lib/openingFolders.ts";
+import CFolderControls from "@/pages/landing/components/CFolderControls.vue";
 import CFolderEditor from "@/pages/landing/components/CFolderEditor.vue";
 import CFolderGrid from "@/pages/landing/components/CFolderGrid.vue";
 import CFolderToolbar from "@/pages/landing/components/CFolderToolbar.vue";
 import CLandingIntroduction from "@/pages/landing/components/CLandingIntroduction.vue";
 
 const folders = ref(getOpeningFolders());
+const presets = getOpeningPresets();
+const searchQuery = ref("");
+const normalizedSearch = computed(() => searchQuery.value.trim().toLowerCase());
+const filteredFolders = computed(() => folders.value.filter((folder) => (
+    folder.name.toLowerCase().includes(normalizedSearch.value)
+)));
+const filteredPresets = computed(() => presets.filter((folder) => (
+    folder.name.toLowerCase().includes(normalizedSearch.value)
+)));
+const emptyLibraryMessage = computed(() => folders.value.length ? "No folders match your search." : "Create your first folder to start collecting opening lines.");
 const selectedFolderName = ref("");
 const selectedFolder = computed(() => folders.value.find((folder) => folder.name === selectedFolderName.value));
+
+watch(searchQuery, clearFolderSelection);
 
 function refreshFolders() {
     folders.value = getOpeningFolders();
@@ -73,6 +113,18 @@ function selectFolder(folderName: string) {
     selectedFolderName.value = folderName;
 }
 
+function unselectFolder(folderName: string) {
+    if (selectedFolderName.value !== folderName) {
+        return;
+    }
+
+    clearFolderSelection();
+}
+
+function clearFolderSelection() {
+    selectedFolderName.value = "";
+}
+
 function removeFolder(folderName: string) {
     if (!window.confirm(`Delete ${ folderName } and all its lines?`)) {
         return;
@@ -86,16 +138,6 @@ function removeFolder(folderName: string) {
     }
 }
 
-function resetFoldersToDefaults() {
-    if (!window.confirm("Replace all folders with the default folders?")) {
-        return;
-    }
-
-    resetOpeningFolders();
-    selectedFolderName.value = "";
-    refreshFolders();
-}
-
 function clearAllFolders() {
     if (!window.confirm("Delete all folders and their lines?")) {
         return;
@@ -104,6 +146,17 @@ function clearAllFolders() {
     clearOpeningFolders();
     selectedFolderName.value = "";
     refreshFolders();
+}
+
+function duplicatePreset(presetName: string) {
+    const folderName = duplicateOpeningPreset(presetName);
+
+    if (!folderName) {
+        return;
+    }
+
+    refreshFolders();
+    selectFolder(folderName);
 }
 
 function exportFolder(folder: TOpeningFolder) {
@@ -139,6 +192,30 @@ function getExportFileName(folderName: string): string {
     .folders-section {
         display: grid;
         gap: var(--length-l);
+
+        & + .folders-section {
+            margin-top: var(--length-xxl);
+        }
+
+        .category-heading {
+            .eyebrow {
+                color: var(--color-primary);
+                font-size: var(--font-size-xs);
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+            }
+
+            h2 {
+                margin: var(--length-xxs) 0;
+                font-size: var(--font-size-xxl);
+                font-weight: 700;
+            }
+
+            p:last-child {
+                color: var(--color-text-softer);
+            }
+        }
     }
 }
 
