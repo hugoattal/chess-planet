@@ -120,7 +120,7 @@ import { addOpeningLine, getOpeningFolders } from "@/lib/openingFolders.ts";
 import { useChessSounds } from "@/pages/editor/composables/useChessSounds.ts";
 import { useChessStore } from "@/pages/editor/store/chess.ts";
 
-const { showSaveLine } = withDefaults(defineProps<{
+withDefaults(defineProps<{
     showSaveLine?: boolean;
 }>(), {
     showSaveLine: true
