@@ -33,33 +33,19 @@
                     >
                         {{ boardSquare.square[0] }}
                     </span>
-
-                    <span
-                        v-if="boardSquare.piece"
-                        :aria-grabbed="draggedSquare === boardSquare.square"
-                        :class="[
-                            'piece',
-                            `${boardSquare.piece.color === WHITE ? 'white' : 'black'}`,
-                            { 'dragging': draggedSquare === boardSquare.square }
-                        ]"
-                        :draggable="!isDisabled && boardSquare.piece.color === chessStore.turn"
-                        @dragend="clearSelection"
-                        @dragstart="startDraggingPiece(boardSquare.square, $event)"
-                    >
-                        <UIcon
-                            aria-hidden="true"
-                            class="piece-icon"
-                            :name="pieces[boardSquare.piece.type]"
-                        />
-                        <UIcon
-                            v-if="confirmedSquare === boardSquare.square"
-                            aria-label="Correct move"
-                            class="correct-move"
-                            name="lucide:check"
-                        />
-                    </span>
                 </button>
             </template>
+
+            <CBoardPieces
+                :confirmed-square="confirmedSquare"
+                :disabled="isDisabled"
+                :dragged-square="draggedSquare"
+                @dragend="clearSelection"
+                @dragover="allowPieceDrop"
+                @dragstart="startDraggingPiece"
+                @drop="dropBoardPiece"
+                @select="selectBoardSquare"
+            />
         </CBoardArrows>
     </div>
 </template>
@@ -70,9 +56,9 @@ import { BLACK, WHITE } from "chess.js";
 import { computed } from "vue";
 
 import CBoardArrows from "@/pages/editor/components/CBoardArrows.vue";
+import CBoardPieces from "@/pages/editor/components/CBoardPieces.vue";
 import { useChessInteraction } from "@/pages/editor/composables/useChessInteraction.ts";
 import type { TBoardArrow } from "@/pages/editor/lib/boardArrows.ts";
-import { pieces } from "@/pages/editor/lib/pieces.ts";
 import { useChessStore } from "@/pages/editor/store/chess.ts";
 
 const props = defineProps<{
@@ -88,7 +74,7 @@ const emit = defineEmits<{
 const chessStore = useChessStore();
 const arrows = computed(() => props.arrows);
 const confirmedSquare = computed(() => props.confirmedSquare);
-const isDisabled = computed(() => props.disabled);
+const isDisabled = computed(() => Boolean(props.disabled));
 const isBlackOrientation = computed(() => chessStore.orientation === BLACK);
 const displayedBoard = computed(() => {
     if (!isBlackOrientation.value) {
@@ -97,6 +83,7 @@ const displayedBoard = computed(() => {
 
     return [...chessStore.board].reverse().map((rank) => [...rank].reverse());
 });
+
 const {
     allowDrop,
     clearSelection,
@@ -161,16 +148,9 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
     --board-dark-square: color-mix(in oklab, var(--color-primary) 75%, var(--color-black));
     --board-highlight: color-mix(in oklab, var(--color-primary) 64%, var(--color-white));
     --board-arrow: color-mix(in oklab, var(--color-primary) 62%, var(--color-white));
-    --board-white-piece: var(--color-white);
-    --board-black-piece: var(--color-neutral-950);
 
     display: grid;
     gap: var(--length-xs);
-
-    .board-toolbar {
-        display: flex;
-        justify-content: flex-end;
-    }
 }
 
 .chess-board {
@@ -242,58 +222,6 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
             width: auto;
         }
 
-        .piece {
-            color: inherit;
-            cursor: grab;
-            display: grid;
-            font-size: clamp(1.8rem, 6.5vw, 4.6rem);
-            place-items: center;
-            position: relative;
-            z-index: 1;
-
-            &:active {
-                cursor: grabbing;
-            }
-
-            &.dragging {
-                opacity: 0.4;
-            }
-
-            &.white {
-                color: var(--board-white-piece);
-
-                filter: drop-shadow(1px 1px 0 var(--board-dark-square))
-                drop-shadow(-1px 1px 0 var(--board-dark-square))
-                drop-shadow(1px -1px 0 var(--board-dark-square))
-                drop-shadow(-1px -1px 0 var(--board-dark-square));
-            }
-
-            &.black {
-                color: var(--board-black-piece);
-
-                filter: drop-shadow(1px 1px 0 var(--board-light-square))
-                drop-shadow(-1px 1px 0 var(--board-light-square))
-                drop-shadow(1px -1px 0 var(--board-light-square))
-                drop-shadow(-1px -1px 0 var(--board-light-square));
-            }
-
-            .piece-icon {
-                font-size: inherit;
-            }
-
-            .correct-move {
-                background: var(--ui-success);
-                border: var(--length-xxxs) solid var(--color-white);
-                border-radius: 50%;
-                bottom: 0;
-                color: var(--color-white);
-                font-size: var(--font-icon-l);
-                padding: var(--length-xxxs);
-                position: absolute;
-                right: calc(var(--length-xs) * -1);
-            }
-        }
-
         .coordinate {
             font-size: var(--font-size-s);
             text-transform: uppercase;
@@ -311,16 +239,6 @@ function getSquareLabel(square: Square, color?: Color, piece?: PieceSymbol) {
             &.file {
                 bottom: var(--length-xxs);
                 right: var(--length-xxs);
-            }
-        }
-    }
-}
-
-@media (max-width: 520px) {
-    .chess-board {
-        .chess-square {
-            .piece {
-                font-size: clamp(1.55rem, 10vw, 3rem);
             }
         }
     }

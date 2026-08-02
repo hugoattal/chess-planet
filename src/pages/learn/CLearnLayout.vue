@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { BLACK, WHITE } from "chess.js";
+import { WHITE } from "chess.js";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
