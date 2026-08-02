@@ -8,6 +8,7 @@ import { githubFallbackPlugin } from "./src/githubFallback.plugin.ts";
 
 // https://vite.dev/config/
 export default defineConfig({
+    base: "/chess-planet",
     plugins: [
         vue(),
         ui({
