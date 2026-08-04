@@ -38,7 +38,6 @@
                 :aria-label="`Duplicate ${ folder.name } preset`"
                 color="neutral"
                 icon="lucide:copy-plus"
-                label="Duplicate"
                 size="sm"
                 variant="soft"
                 @click="emit('duplicate', folder.name)"
@@ -146,7 +145,6 @@ function unselectFolder() {
 
         &.preset-folder {
             cursor: default;
-            padding-right: 110px;
         }
 
         .folder-icon {

@@ -24,7 +24,7 @@
                 icon="lucide:flame"
                 :label="`Continue streak · ${ streak } ${ streak === 1 ? 'win' : 'wins' }`"
                 size="lg"
-                @click="emit('restart')"
+                @click="emit('continue')"
             />
             <UButton
                 v-else
@@ -61,6 +61,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     close: [];
+    continue: [];
     restart: [];
 }>();
 

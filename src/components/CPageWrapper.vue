@@ -4,7 +4,7 @@
         <UMain>
             <slot />
         </UMain>
-        <USeparator icon="lucide:save" />
+        <USeparator icon="fa7-solid:chess" />
         <CFooter />
     </div>
 </template>

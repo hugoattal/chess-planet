@@ -52,7 +52,8 @@
             :outcome="outcome"
             :streak="streak"
             @close="isResultOpen = false"
-            @restart="startPractice"
+            @continue="startPractice"
+            @restart="restartPractice"
         />
     </main>
 </template>
@@ -92,6 +93,7 @@ const {
     hasConfirmedMove,
     hasLines,
     outcome,
+    restartPractice,
     startPractice,
     streak,
     suggestedArrows,

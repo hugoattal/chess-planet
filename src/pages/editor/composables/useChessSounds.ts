@@ -1,9 +1,9 @@
 import type { Move } from "chess.js";
 
-import captureFx from "@/pages/editor/assets/fx/capture.mp3";
-import moveCheckFx from "@/pages/editor/assets/fx/move-check.mp3";
-import moveSelfFx from "@/pages/editor/assets/fx/move-self.mp3";
-import promoteFx from "@/pages/editor/assets/fx/promote.mp3";
+import captureFx from "@/pages/editor/assets/fx/capture.ogg";
+import moveCheckFx from "@/pages/editor/assets/fx/move-check.ogg";
+import moveSelfFx from "@/pages/editor/assets/fx/move-self.ogg";
+import promoteFx from "@/pages/editor/assets/fx/promote.ogg";
 
 const sounds = {
     capture: new Audio(captureFx),

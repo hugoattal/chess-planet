@@ -19,9 +19,9 @@ import { useChessStore } from "@/pages/editor/store/chess.ts";
 
 export type TPracticeOutcome = "loss" | "win";
 
-const opponentDelay = 2000;
+const opponentDelay = 1000;
 const mistakeUndoDelay = 1000;
-const mistakeResultDelay = 3000;
+const mistakeResultDelay = 2000;
 const confettiColors = ["#818cf8", "#6366f1", "#4338ca"];
 
 export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | undefined>) {
@@ -37,6 +37,8 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
     const waitingForOpponent = ref(false);
     const reviewingMistake = ref(false);
     let pendingActionId = 0;
+    let practiceSeed = createRandomSeed();
+    let random = createSeededRandom(practiceSeed);
 
     const playerColor = computed<Color>(() => activeFolder.value?.color === "black" ? BLACK : WHITE);
     const canPlayerMove = computed(() => (
@@ -57,7 +59,17 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
     onBeforeUnmount(cancelPendingAction);
 
     function startPractice() {
+        practiceSeed = createRandomSeed();
+        resetPractice();
+    }
+
+    function restartPractice() {
+        resetPractice();
+    }
+
+    function resetPractice() {
         cancelPendingAction();
+        random = createSeededRandom(practiceSeed);
         confirmedSquare.value = undefined;
         suggestedArrows.value = [];
         outcome.value = undefined;
@@ -141,7 +153,7 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
         }
 
         const choices = [...possibleMoves.values()];
-        const selectedMove = choices[Math.floor(Math.random() * choices.length)];
+        const selectedMove = choices[Math.floor(random() * choices.length)];
 
         const playedMove = chessStore.move(selectedMove.from, selectedMove.to);
         playMoveSound(playedMove, chessStore.isCheck);
@@ -191,6 +203,7 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
         hasConfirmedMove,
         hasLines,
         outcome,
+        restartPractice,
         startPractice,
         streak,
         suggestedArrows,
@@ -200,4 +213,15 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
 
 function getMoveKey(move: Move): string {
     return `${ move.from }${ move.to }${ move.promotion ?? "" }`;
+}
+
+function createRandomSeed(): number {
+    return crypto.getRandomValues(new Uint32Array(1))[0]!;
+}
+
+function createSeededRandom(seed: number): () => number {
+    return function random() {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        return seed / 0x100000000;
+    };
 }
