@@ -26,7 +26,7 @@ const confettiColors = ["#818cf8", "#6366f1", "#4338ca"];
 
 export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | undefined>) {
     const chessStore = useChessStore();
-    const { playMoveSound } = useChessSounds();
+    const { playLoseSound, playMoveSound, playWinSound } = useChessSounds();
     const lineMoves = ref<Array<Array<Move>>>([]);
     const activeLines = ref<Array<Array<Move>>>([]);
     const confirmedSquare = ref<Square>();
@@ -175,6 +175,7 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
         outcome.value = result;
 
         if (result === "win") {
+            playWinSound();
             streak.value += 1;
             void confetti({
                 colors: confettiColors,
@@ -186,6 +187,7 @@ export function useOpeningPractice(activeFolder: ComputedRef<TOpeningFolder | un
             return;
         }
 
+        playLoseSound();
         endedStreak.value = streak.value;
         streak.value = 0;
     }
