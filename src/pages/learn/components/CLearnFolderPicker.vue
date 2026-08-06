@@ -29,7 +29,7 @@
                         name="lucide:folder"
                     />
                     <h3>{{ folder.name }}</h3>
-                    <p>{{ folder.lines.length }} {{ folder.lines.length === 1 ? "line" : "lines" }} · Play both sides</p>
+                    <p>{{ folder.lines.length }} {{ folder.lines.length === 1 ? "line" : "lines" }}</p>
                     <UButton
                         block
                         icon="lucide:graduation-cap"
@@ -80,7 +80,6 @@ const folderGroups = computed<Array<TFolderGroup>>(() => [
 <style scoped>
 .folder-heading {
     margin-bottom: var(--length-xl);
-    text-align: center;
 
     .eyebrow {
         color: var(--color-primary);

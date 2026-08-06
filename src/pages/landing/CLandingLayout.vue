@@ -85,7 +85,7 @@ const filteredFolders = computed(() => folders.value.filter((folder) => (
 const filteredPresets = computed(() => presets.filter((folder) => (
     folder.name.toLowerCase().includes(normalizedSearch.value)
 )));
-const emptyLibraryMessage = computed(() => folders.value.length ? "No folders match your search." : "Create your first folder to start collecting opening lines.");
+const emptyLibraryMessage = computed(() => folders.value.length ? "No folders match your search." : "Create your first folder to save your own opening lines.");
 const selectedFolderName = ref("");
 const selectedFolder = computed(() => folders.value.find((folder) => folder.name === selectedFolderName.value));
 

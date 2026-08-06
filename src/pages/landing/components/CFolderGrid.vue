@@ -40,7 +40,7 @@ withDefaults(defineProps<{
     preset?: boolean;
     selectedFolderName?: string;
 }>(), {
-    emptyMessage: "Create your first folder to start collecting opening lines.",
+    emptyMessage: "Create your first folder to save your own opening lines.",
     preset: false,
     selectedFolderName: ""
 });

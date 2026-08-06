@@ -1,12 +1,13 @@
 <template>
     <header class="folders-heading">
         <div>
-            <p class="eyebrow">
+            <h2 class="eyebrow">
                 Your library
-            </p>
+            </h2>
             <h2 id="folders-title">
                 Your folders
             </h2>
+            <p>Your folders are saved to your browser local storage.</p>
         </div>
     </header>
 
@@ -63,7 +64,7 @@ defineProps<{
 const emit = defineEmits<{
     "clear-all": [];
     "export-all": [];
-    imported: [];
+    "imported": [];
 }>();
 
 const transferMessage = ref("");
@@ -106,6 +107,10 @@ async function importFolderFile(event: Event) {
         margin-top: var(--length-xxs);
         font-size: var(--font-size-xxl);
         font-weight: 700;
+    }
+
+    p:last-child {
+        color: var(--color-text-softer);
     }
 }
 

@@ -4,7 +4,7 @@
             Opening practice
         </p>
         <h1>Choose a folder</h1>
-        <p>Train its saved lines from the side you selected.</p>
+        <p>Practice by playing the right move on random configurations.</p>
     </header>
 
     <div
@@ -80,7 +80,6 @@ const folderGroups = computed<Array<TFolderGroup>>(() => [
 <style scoped>
 .folder-heading {
     margin-bottom: var(--length-xl);
-    text-align: center;
 
     .eyebrow {
         color: var(--color-primary);
